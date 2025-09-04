@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Robux Generator</title>
+  <style>
+    :root{
+      --bg: #041f0f;
+      --panel:#072715;
+      --accent:#00c853;
+      --accent-2:#36d399;
+      --text:#e8fdf0;
+      --muted:#a7d5b7;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial;
+      background: linear-gradient(180deg,#031d0d 0%, #041f0f 100%);
+      color:var(--text);
+      display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .card{width:100%; max-width:620px; background:linear-gradient(180deg,#072a17,#062013); border-radius:18px; box-shadow:0 30px 60px rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.04); overflow:hidden}
+    header{display:flex; align-items:center; gap:12px; padding:18px 22px; background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+    .brand{font-weight:800; letter-spacing:.4px} 
+    .tag{font-size:12px; padding:6px 10px; border-radius:999px; background:rgba(0,200,83,.15); color:var(--accent); border:1px solid rgba(0,200,83,.3)}
+    .body{padding:26px}
+    label{display:block; font-weight:700; margin-bottom:8px}
+    input[type=text]{width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:#03150b; color:var(--text); font-size:15px}
+    .actions{display:flex; gap:10px; margin-top:16px}
+    .btn{padding:10px 14px; border-radius:10px; border:0; font-weight:700; cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#00e676); color:#04170d}
+    .btn.ghost{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.08)}
+
+    .step{display:none; animation:fade .32s ease both}
+    .step.active{display:block}
+    @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+    .loader{display:flex; align-items:center; gap:10px; margin:12px 0}
+    .dots{display:inline-flex; gap:6px}
+    .dot{width:10px; height:10px; border-radius:50%; background:var(--accent); opacity:.25; animation:blink 1s infinite}
+    .dot:nth-child(2){animation-delay:.15s} .dot:nth-child(3){animation-delay:.3s}
+    @keyframes blink{50%{opacity:1}}
+
+    .progress-wrap{margin-top:12px; background:rgba(255,255,255,.05); height:10px; border-radius:999px; overflow:hidden}
+    .progress{height:10px; width:0%}
+
+    .amounts{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px}
+    .chip{padding:12px; text-align:center; border-radius:10px; border:1px solid rgba(255,255,255,.06); cursor:pointer}
+    .chip.active{box-shadow:0 6px 20px rgba(0,0,0,.6) inset; border-color:rgba(0,200,83,.45)}
+
+    .success{margin-top:12px; padding:14px; border-radius:12px; background:linear-gradient(180deg, rgba(54,211,153,.08), rgba(255,255,255,0.01)); border:1px solid rgba(54,211,153,.12)}
+  </style>
+</head>
+<body>
+  <div class="card" role="region" aria-label="Robux Generator">
+    <header>
+      <div class="brand">Robux Generator</div>
+      <div class="tag">Robux Generator</div>
+    </header>
+    <div class="body">
+      <section id="step-1" class="step active">
+        <label for="player">Enter player name</label>
+        <input id="player" type="text" maxlength="20" placeholder="e.g., CoolPlayer" aria-label="player name" />
+        <div class="actions">
+          <button class="btn ghost" onclick="resetAll()">Reset</button>
+          <button id="next" class="btn primary" disabled>Find</button>
+        </div>
+      </section>
+
+      <section id="step-2" class="step" aria-live="polite">
+        <h3>Finding <span id="found-name"></span></h3>
+        <div class="loader"><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        <div class="progress-wrap"><div id="bar-1" class="progress" style="background:linear-gradient(90deg,var(--accent),#00e676);"></div></div>
+      </section>
+
+      <section id="step-3" class="step">
+        <h3>Generating for <span id="gen-name"></span></h3>
+        <div class="loader"><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        <div class="progress-wrap"><div id="bar-2" class="progress" style="background:linear-gradient(90deg,#36d399,#00e676);"></div></div>
+      </section>
+
+      <section id="step-4" class="step">
+        <h3>Choose amount of Robux</h3>
+        <div class="amounts" role="group" aria-label="amounts">
+          <div class="chip" data-amt="50">50 Robux</div>
+          <div class="chip" data-amt="200">200 Robux</div>
+          <div class="chip" data-amt="1000">1,000 Robux</div>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" onclick="go(1)">Back</button>
+          <button id="send" class="btn primary" disabled>Send</button>
+        </div>
+      </section>
+
+      <section id="step-5" class="step">
+        <h3>Success</h3>
+        <div class="success">
+          <p><strong id="final-name"></strong> — Robux: <strong id="final-amt"></strong></p>
+          <p class="hint">Please wait 3 days. If it doesn't arrive, please put this email on your account: <strong>freerobuxandvoicechat20@gmail.com</strong></p>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" onclick="resetAll()">Try again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+  const steps = [1,2,3,4,5].map(i=>document.getElementById('step-'+i));
+  const player = document.getElementById('player');
+  const next = document.getElementById('next');
+  const foundName = document.getElementById('found-name');
+  const genName = document.getElementById('gen-name');
+  const bar1 = document.getElementById('bar-1');
+  const bar2 = document.getElementById('bar-2');
+  const chips = Array.from(document.querySelectorAll('.chip'));
+  const send = document.getElementById('send');
+  const finalName = document.getElementById('final-name');
+  const finalAmt = document.getElementById('final-amt');
+  let selected = null;
+
+  function go(n){ steps.forEach(s=>s.classList.remove('active')); document.getElementById('step-'+n).classList.add('active'); }
+  function resetAll(){ player.value=''; next.disabled=true; chips.forEach(c=>c.classList.remove('active')); selected=null; send.disabled=true; go(1); player.focus(); }
+
+  player.addEventListener('input', ()=>{ next.disabled = player.value.trim().length < 2; });
+
+  next.addEventListener('click', ()=>{
+    const name = player.value.trim(); foundName.textContent = name; genName.textContent = name;
+    go(2); progress(bar1, ()=>{ go(3); progress(bar2, ()=>{ go(4); }); });
+  });
+
+  chips.forEach(c=> c.addEventListener('click', ()=>{ chips.forEach(x=>x.classList.remove('active')); c.classList.add('active'); selected = c.dataset.amt; send.disabled=false; }));
+
+  send.addEventListener('click', ()=>{
+    finalName.textContent = player.value.trim(); finalAmt.textContent = Number(selected).toLocaleString() + ' Robux'; go(5);
+  });
+
+  function progress(el, cb){ el.style.width='0%'; let p=0; const iv=setInterval(()=>{ p += Math.random()*20; if(p>=100){ p=100; clearInterval(iv); setTimeout(cb,350);} el.style.width = p + '%'; },180); }
+
+  resetAll();
+</script>
+</body>
+</html>
